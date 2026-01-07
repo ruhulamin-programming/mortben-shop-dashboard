@@ -135,6 +135,85 @@ const PackageManagement = () => {
     setLoading(false);
   };
 
+  const groupedPackages = (packages?.result || []).reduce(
+    (acc: Record<string, any[]>, pack: any) => {
+      const key = pack.packageName || "Other";
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(pack);
+      return acc;
+    },
+    {}
+  );
+
+  const paletteMap: Record<
+    string,
+    {
+      cardBg: string;
+      ring: string;
+      accentText: string;
+      badgeBg: string;
+      badgeText: string;
+      chipBg: string;
+    }
+  > = {
+    "Full Package": {
+      cardBg: "from-emerald-50 via-white to-emerald-100",
+      ring: "ring-emerald-100",
+      accentText: "text-emerald-700",
+      badgeBg: "bg-emerald-100",
+      badgeText: "text-emerald-700",
+      chipBg: "bg-emerald-50",
+    },
+    "Lunch Package": {
+      cardBg: "from-amber-50 via-white to-amber-100",
+      ring: "ring-amber-100",
+      accentText: "text-amber-700",
+      badgeBg: "bg-amber-100",
+      badgeText: "text-amber-700",
+      chipBg: "bg-amber-50",
+    },
+    "Morning Half Board": {
+      cardBg: "from-sky-50 via-white to-sky-100",
+      ring: "ring-sky-100",
+      accentText: "text-sky-700",
+      badgeBg: "bg-sky-100",
+      badgeText: "text-sky-700",
+      chipBg: "bg-sky-50",
+    },
+    "Noon Half Board": {
+      cardBg: "from-rose-50 via-white to-rose-100",
+      ring: "ring-rose-100",
+      accentText: "text-rose-700",
+      badgeBg: "bg-rose-100",
+      badgeText: "text-rose-700",
+      chipBg: "bg-rose-50",
+    },
+    Other: {
+      cardBg: "from-slate-50 via-white to-slate-100",
+      ring: "ring-slate-100",
+      accentText: "text-slate-700",
+      badgeBg: "bg-slate-100",
+      badgeText: "text-slate-700",
+      chipBg: "bg-slate-50",
+    },
+  };
+
+  const formatMeals = (pack: any) => {
+    if (pack.packageName === "Full Package") {
+      return "lunch, breakfast, dinner, 2 snacks, side";
+    }
+
+    const meals = [...pack.meals];
+    const snackCount = meals.filter(
+      (m: string) => m.toLowerCase() === "snack" || m.toLowerCase() === "snacks"
+    ).length;
+    const filtered = meals.filter(
+      (m: string) => m.toLowerCase() !== "snack" && m.toLowerCase() !== "snacks"
+    );
+    if (snackCount > 0) filtered.push(`${snackCount} snacks`);
+    return filtered.join(", ");
+  };
+
   return (
     <>
       <div ref={printRef} className="p-4 md:p-6 bg-white rounded-lg shadow-md">
@@ -535,158 +614,141 @@ const PackageManagement = () => {
         <div className="overflow-x-auto">
           {isLoading ? (
             <CustomeLoader message="Loading Packages, please wait..." />
+          ) : Object.keys(groupedPackages).length === 0 ? (
+            <div className="rounded-xl border border-[#E8ECF4] bg-gradient-to-br from-white via-[#F7F9FC] to-[#EEF3FB] p-6 shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#4F46E5] shadow-md">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="h-6 w-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3.75 9h16.5m-16.5 0a2.25 2.25 0 0 1 2.25-2.25h12.75a2.25 2.25 0 0 1 2.25 2.25m-16.5 0v7.5A2.25 2.25 0 0 0 6 18.75h12a2.25 2.25 0 0 0 2.25-2.25V9m-9 4.5h3.75M9 13.5h.008v.008H9z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-[#1E1F2D] font-semibold">
+                    No packages found
+                  </p>
+                  <p className="text-sm text-[#6B7280]">
+                    Create your first package to start organizing plans by name.
+                  </p>
+                </div>
+              </div>
+            </div>
           ) : (
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    className="px-2 py-3 text-start text-sm font-medium text-gray-500"
-                  >
-                    SL
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-start text-sm font-medium text-gray-500"
-                  >
-                    Package Name
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-start text-sm font-medium text-gray-500"
-                  >
-                    Plan
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-start text-sm font-medium text-gray-500"
-                  >
-                    Calories
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-start text-sm font-medium text-gray-500"
-                  >
-                    Price
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-start text-sm font-medium text-gray-500"
-                  >
-                    Status
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-start text-sm font-medium text-gray-500"
-                  >
-                    Meals
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-start text-sm font-medium text-gray-500"
-                  >
-                    Create Time
-                  </th>
+            <div className="space-y-6">
+              {Object.entries(groupedPackages).map(([packageName, items]) => (
+                <div
+                  key={packageName}
+                  className="rounded-2xl border border-[#E8ECF4] bg-white p-4 md:p-6 shadow-sm"
+                >
+                  <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-lg font-semibold text-[#1E1F2D]">
+                        {packageName}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-[#63B8831A] px-3 py-1 text-xs font-semibold text-[#63B883]">
+                      Organized by package name
+                    </span>
+                  </div>
 
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-center text-sm font-medium text-gray-500 w-[15%]"
-                  >
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {packages?.result?.map((pack: any, index: number) => (
-                  <tr key={pack.id}>
-                    <td className="whitespace-nowrap py-2 text-sm text-[#3F3D56] font-[500]">
-                      {index + 1}
-                    </td>
-                    <td className="whitespace-nowrap py-2 text-sm text-[#3F3D56] font-[500]">
-                      {pack.packageName}
-                    </td>
-                    <td className="whitespace-nowrap py-2 text-sm text-[#3F3D56] font-[500]">
-                      {pack.planName}
-                    </td>
-                    <td className="whitespace-nowrap py-2 text-sm text-[#3F3D56] font-[500]">
-                      {pack.calories}
-                    </td>
-                    <td className="whitespace-nowrap py-2 text-sm text-[#3F3D56] font-[500]">
-                      {pack.price}
-                    </td>
-                    <td className="whitespace-nowrap py-2 text-sm text-[#3F3D56] font-[500]">
-                      {pack.status === true ? "Active" : "Inactive"}
-                    </td>
-                    <td className="whitespace-nowrap py-2 text-sm text-[#3F3D56] font-[500]">
-                      {pack.packageName === "Full Package"
-                        ? "lunch, breakfast, dinner, 2 snacks, side"
-                        : (() => {
-                            const meals = [...pack.meals];
-
-                            // Count all snack variants
-                            const snackCount = meals.filter(
-                              (m) =>
-                                m.toLowerCase() === "snack" ||
-                                m.toLowerCase() === "snacks"
-                            ).length;
-
-                            // Remove snack items
-                            const filtered = meals.filter(
-                              (m) =>
-                                m.toLowerCase() !== "snack" &&
-                                m.toLowerCase() !== "snacks"
-                            );
-
-                            // Add formatted snack text
-                            if (snackCount > 0) {
-                              filtered.push(`${snackCount} snacks`);
-                            }
-
-                            return filtered.join(", ");
-                          })()}
-                    </td>
-
-                    <td className="whitespace-nowrap py-2 text-sm text-[#3F3D56] font-[500]">
-                      {pack.createdAt
-                        ? new Date(pack.createdAt).toLocaleString()
-                        : "Mon Jun 16 2025"}{" "}
-                    </td>
-
-                    <td className="whitespace-nowrap  py-2 text-sm text-gray-500 flex justify-center items-center gap-4">
-                      <button
-                        className="cursor-pointer inline-flex gap-2 items-center justify-center rounded-md border border-gray-300 bg-[#FFF7E8] px-2.5 py-2 text-xs font-medium text-[#63B883] shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        onClick={() => {
-                          reset({
-                            id: pack.id,
-                            packageName: pack.packageName,
-                            price: pack.price,
-                            calories: pack.calories,
-                            meals: pack.meals.join(", "),
-                            status: pack.status,
-                            planName: pack.planName,
-                          });
-                          setUpdateModal(true);
-                        }}
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {(items as any[]).map((pack: any, index: number) => (
+                      <div
+                        key={pack.id}
+                        className="rounded-xl border border-[#EEF1F7] bg-gradient-to-br from-white via-[#F9FAFB] to-[#F3F6FF] p-4 shadow-sm"
                       >
-                        <Edit size={20} /> Edit
-                      </button>
+                        <div className="mb-2 flex items-start justify-between gap-2">
+                          <div>
+                            <p className="text-sm font-semibold text-[#1E1F2D]">
+                              {pack.planName}
+                            </p>
+                            <p className="text-xs text-[#6B7280]">
+                              Created{" "}
+                              {pack.createdAt
+                                ? new Date(pack.createdAt).toLocaleDateString()
+                                : "-"}
+                            </p>
+                          </div>
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                              pack.status === true
+                                ? "bg-[#E6F7EE] text-[#2F9E61]"
+                                : "bg-[#FFEDED] text-[#E34141]"
+                            }`}
+                          >
+                            {pack.status === true ? "Active" : "Inactive"}
+                          </span>
+                        </div>
 
-                      <div className="inline-block text-left">
-                        <button
-                          onClick={() => handleDelete(pack?.id)}
-                          type="button"
-                          className="inline-flex gap-1 items-center justify-center rounded-md border border-transparent bg-[#FFEDED] px-2.5 py-2 text-xs font-medium text-[#FE4D4F] shadow-sm hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                          aria-controls={`alert-dialog-content-${pack.id}`}
-                          aria-describedby={`alert-dialog-description-${pack.id}`}
-                        >
-                          <Trash size={20} /> Delete
-                        </button>
+                        <div className="mb-3 grid grid-cols-2 gap-2 text-sm text-[#1E1F2D]">
+                          <div className="rounded-lg bg-white/80 px-3 py-2 shadow-inner">
+                            <p className="text-[11px] uppercase tracking-wide text-[#6B7280]">
+                              Calories
+                            </p>
+                            <p className="font-semibold">{pack.calories}</p>
+                          </div>
+                          <div className="rounded-lg bg-white/80 px-3 py-2 shadow-inner">
+                            <p className="text-[11px] uppercase tracking-wide text-[#6B7280]">
+                              Price
+                            </p>
+                            <p className="font-semibold">{pack.price}</p>
+                          </div>
+                        </div>
+
+                        <div className="mb-3 rounded-lg bg-white/70 px-3 py-2 text-sm text-[#1E1F2D] shadow-inner">
+                          <p className="text-[11px] uppercase tracking-wide text-[#6B7280]">
+                            Meals
+                          </p>
+                          <p className="font-semibold leading-snug">
+                            {formatMeals(pack)}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-2">
+                          <button
+                            className="cursor-pointer inline-flex gap-2 items-center justify-center rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-[#63B883] shadow-sm hover:-translate-y-0.5 hover:shadow-md transition"
+                            onClick={() => {
+                              reset({
+                                id: pack.id,
+                                packageName: pack.packageName,
+                                price: pack.price,
+                                calories: pack.calories,
+                                meals: pack.meals.join(", "),
+                                status: pack.status,
+                                planName: pack.planName,
+                              });
+                              setUpdateModal(true);
+                            }}
+                          >
+                            <Edit size={18} /> Edit
+                          </button>
+
+                          <button
+                            onClick={() => handleDelete(pack?.id)}
+                            type="button"
+                            className="inline-flex gap-1 items-center justify-center rounded-md border border-transparent bg-[#FFEDED] px-3 py-2 text-xs font-medium text-[#FE4D4F] shadow-sm hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition"
+                            aria-controls={`alert-dialog-content-${pack.id}`}
+                            aria-describedby={`alert-dialog-description-${pack.id}`}
+                          >
+                            <Trash size={18} /> Delete
+                          </button>
+                        </div>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

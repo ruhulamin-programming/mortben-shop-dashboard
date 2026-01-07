@@ -28,6 +28,7 @@ const OrderManagementTable = () => {
     page,
   });
   console.log(orders);
+  const orderItems = orders?.result?.orders ?? [];
   const totalPages = orders?.result?.totalPages || 1;
 
   const [orderUpdateFn, { isLoading, error: orderUpdateError }] =
@@ -91,6 +92,36 @@ const OrderManagementTable = () => {
         <div className="overflow-x-auto">
           {ordersLoading ? (
             <CustomeLoader message="Loading orders, please wait..." />
+          ) : orderItems.length === 0 ? (
+            <div className="rounded-xl border border-[#E8ECF4] bg-gradient-to-br from-white via-[#F7F9FC] to-[#EEF3FB] p-6 shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#4F46E5] shadow-md">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="h-6 w-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3.75 9h16.5m-16.5 0a2.25 2.25 0 0 1 2.25-2.25h12.75a2.25 2.25 0 0 1 2.25 2.25m-16.5 0v7.5A2.25 2.25 0 0 0 6 18.75h12a2.25 2.25 0 0 0 2.25-2.25V9m-9 4.5h3.75M9 13.5h.008v.008H9z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-[#1E1F2D] font-semibold">
+                    No orders found
+                  </p>
+                  <p className="text-sm text-[#6B7280]">
+                    Orders you receive will show up here automatically. Refresh
+                    or check back later.
+                  </p>
+                </div>
+              </div>
+            </div>
           ) : (
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -125,7 +156,7 @@ const OrderManagementTable = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 bg-white">
-                {orders?.result?.orders.map((order: order, index: number) => {
+                {orderItems.map((order: order, index: number) => {
                   const selectedStatus = statusMap[order.id] || order.status;
                   return (
                     <tr key={order.id}>

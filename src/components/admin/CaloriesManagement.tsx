@@ -16,6 +16,7 @@ const CaloriesManagement = () => {
   const [calories, setCalories] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: caloriesData, isLoading } = useGetCaloriesQuery("");
+  const caloriesList = caloriesData?.result ?? [];
   const [caloriesDeleteFn, { error: deleteError }] =
     useDeleteCaloriesMutation();
   const [createCaloriesFn, { error: createError }] =
@@ -84,23 +85,38 @@ const CaloriesManagement = () => {
 
   return (
     <>
-      <div ref={printRef} className="p-4 md:p-6 bg-white rounded-lg shadow-md">
+      <div
+        ref={printRef}
+        className="p-4 md:p-6 mt-4 rounded-2xl shadow-md bg-gradient-to-br from-[#F8FAFF] via-white to-[#F1F5FF]"
+      >
         <ToastContainer position="bottom-right" />
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            Calories Management
-          </h2>
-
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#6E498B] rounded-md shadow hover:bg-[#4ea172]"
-          >
-            <Plus size={18} /> Add Calories
-          </button>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-[#1E1F2D]">
+              Calories Management
+            </h2>
+            <p className="text-sm text-[#6B7280]">
+              Maintain calorie presets, print records, and keep the list clean.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => handlePrint()}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#6E498B] rounded-lg shadow hover:bg-[#4ea172]"
+            >
+              Download
+            </button>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#6E498B] rounded-lg shadow hover:bg-[#4ea172]"
+            >
+              <Plus size={18} /> Add Calories
+            </button>
+          </div>
         </div>
         {isModalOpen && (
-          <div className="fixed inset-0 bg-opacalories-50 z-75 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-lg w-[90%] h-[25%] max-w-md shadow-lg">
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center px-4">
+            <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl border border-[#E8ECF4]">
               <h3 className="text-lg font-semibold mb-4">Add New Calories</h3>
               <input
                 type="number"
@@ -113,13 +129,13 @@ const CaloriesManagement = () => {
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCreateCalories}
-                  className="px-4 py-2 bg-[#63B883] text-white rounded-md hover:bg-[#4ea172]"
+                  className="px-4 py-2 bg-[#63B883] text-white rounded-md shadow hover:bg-[#4ea172]"
                 >
                   Create
                 </button>
@@ -131,89 +147,89 @@ const CaloriesManagement = () => {
         <div className="overflow-x-auto">
           {isLoading ? (
             <CustomeLoader message="Loading calories, please wait..." />
+          ) : caloriesList.length === 0 ? (
+            <div className="rounded-xl border border-[#E8ECF4] bg-gradient-to-br from-white via-[#F7F9FC] to-[#EEF3FB] p-6 shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#4F46E5] shadow-md">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="h-6 w-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3.75 9h16.5m-16.5 0a2.25 2.25 0 0 1 2.25-2.25h12.75a2.25 2.25 0 0 1 2.25 2.25m-16.5 0v7.5A2.25 2.25 0 0 0 6 18.75h12a2.25 2.25 0 0 0 2.25-2.25V9m-9 4.5h3.75M9 13.5h.008v.008H9z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-[#1E1F2D] font-semibold">
+                    No calories found
+                  </p>
+                  <p className="text-sm text-[#6B7280]">
+                    Add a calorie preset to start building your meal offerings.
+                  </p>
+                </div>
+              </div>
+            </div>
           ) : (
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-start text-sm font-medium text-gray-500"
-                  >
-                    SL
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-start text-sm font-medium text-gray-500"
-                  >
-                    Calories
-                  </th>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {caloriesList.map((item: any, index: number) => (
+                <div
+                  key={item.id}
+                  className="flex h-full flex-col rounded-xl border border-[#E8ECF4] bg-gradient-to-br from-white via-[#F9FAFB] to-[#F3F6FF] p-4 shadow-sm ring-1 ring-[#EEF1F7] transition hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className="mb-2 flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-[#1E1F2D]">
+                        {item.calories} kcal
+                      </p>
+                      <p className="text-xs text-[#6B7280]">
+                        Added{" "}
+                        {item.createdAt
+                          ? new Date(item.createdAt).toLocaleDateString()
+                          : "-"}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-[#E6F7EE] px-2.5 py-1 text-[11px] font-semibold text-[#2F9E61]">
+                      Preset
+                    </span>
+                  </div>
 
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-start text-sm font-medium text-gray-500"
-                  >
-                    Create Time
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-start text-sm font-medium text-gray-500"
-                  >
-                    Update Time
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-center text-sm font-medium text-gray-500 w-[15%]"
-                  >
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {caloriesData?.result?.map((calories: any, index: number) => (
-                  <tr key={calories.id}>
-                    <td className="whitespace-nowrap py-3 text-sm text-[#3F3D56] font-[500]">
-                      {index + 1}
-                    </td>
-                    <td className="whitespace-nowrap py-3 text-sm text-[#3F3D56] font-[500]">
-                      {calories.calories}
-                    </td>
-                    <td className="whitespace-nowrap py-3 text-sm text-[#3F3D56] font-[500]">
-                      {calories.createdAt
-                        ? new Date(calories.createdAt).toLocaleString()
-                        : "Mon Jun 16 2025"}{" "}
-                    </td>
-                    <td className="whitespace-nowrap py-3 text-sm text-[#3F3D56] font-[500]">
-                      {calories.updatedAt
-                        ? new Date(calories.createdAt).toLocaleString()
-                        : "Mon Jun 16 2025"}{" "}
-                    </td>
-                    <td className="whitespace-nowrap  py-3 text-sm text-gray-500 flex justify-center items-center gap-4">
-                      <div className="relative inline-block text-left">
-                        <button
-                          onClick={() => handleDelete(calories?.id)}
-                          type="button"
-                          className="inline-flex gap-1 items-center justify-center rounded-md border border-transparent bg-[#FFEDED] px-2.5 py-2.5 text-xs font-medium text-[#FE4D4F] shadow-sm hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                          aria-controls={`alert-dialog-content-${calories.id}`}
-                          aria-describedby={`alert-dialog-description-${calories.id}`}
-                        >
-                          <Trash size={20} /> Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                  <div className="mb-3 rounded-lg bg-white/70 px-3 py-2 text-sm text-[#1E1F2D] shadow-inner">
+                    <p className="text-[11px] uppercase tracking-wide text-[#6B7280]">
+                      Last Update
+                    </p>
+                    <p className="font-semibold">
+                      {item.updatedAt
+                        ? new Date(item.updatedAt).toLocaleDateString()
+                        : "-"}
+                    </p>
+                  </div>
+
+                  <div className="mt-auto flex items-center justify-between gap-2">
+                    <span className="rounded-md bg-white px-3 py-2 text-xs font-medium text-[#6B7280] shadow-inner">
+                      #{index + 1}
+                    </span>
+                    <button
+                      onClick={() => handleDelete(item?.id)}
+                      type="button"
+                      className="inline-flex gap-1 items-center justify-center rounded-md border border-transparent bg-[#FFEDED] px-3 py-2 text-xs font-medium text-[#FE4D4F] shadow-sm hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition"
+                      aria-controls={`alert-dialog-content-${item.id}`}
+                      aria-describedby={`alert-dialog-description-${item.id}`}
+                    >
+                      <Trash size={18} /> Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
-      </div>
-      <div className="flex justify-end mt-4 space-x-2">
-        <button
-          onClick={() => handlePrint()}
-          className="border px-1 py-2 rounded-md bg-[#9473ad] hover:bg-[#71518a] text-white cursor-pointer"
-        >
-          {loading ? "Downloading..." : "Download PDF"}
-        </button>
       </div>
     </>
   );

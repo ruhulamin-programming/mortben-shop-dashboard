@@ -15,7 +15,8 @@ const CityManagement = () => {
   const [newCity, setNewCity] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { data: cities, isLoading } = useAllCitiesQuery({ page });
-  const totalPages = cities?.result?.totalPages;
+  const citiesList = cities?.result?.cities ?? [];
+  const totalPages = cities?.result?.totalPages || 1;
   const [cityDeleteFn, { error: deleteError }] = useDeleteCityMutation();
   const [cityUpdateFn, { error: updateError }] = useUpdateCityMutation();
   const [cityCreate, { error: createError }] = useCreateCityMutation();
@@ -111,22 +112,33 @@ const CityManagement = () => {
 
   return (
     <>
-      <div ref={printRef} className="p-4 md:p-6 bg-white rounded-lg shadow-md">
-        <ToastContainer />
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            City Management
-          </h2>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#6E498B] rounded-md shadow hover:bg-[#4ea172]"
-          >
-            <Plus size={18} /> Add City
-          </button>
+      <div
+        ref={printRef}
+        className="p-4 md:p-6 rounded-2xl shadow-md bg-gradient-to-br from-[#F8FAFF] via-white to-[#F1F5FF]"
+      >
+        <ToastContainer position="bottom-right" />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-[#1E1F2D]">
+              City Management
+            </h2>
+            <p className="text-sm text-[#6B7280]">
+              Organize service areas, update availability, and keep records
+              printable.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#6E498B] rounded-lg shadow hover:bg-[#4ea172]"
+            >
+              <Plus size={18} /> Add City
+            </button>
+          </div>
         </div>
         {isModalOpen && (
-          <div className="fixed inset-0 bg-opacity-50 z-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-lg w-[90%] h-[25%] max-w-md shadow-lg">
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center px-4">
+            <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl border border-[#E8ECF4]">
               <h3 className="text-lg font-semibold mb-4">Create New City</h3>
               <input
                 type="text"
@@ -139,13 +151,13 @@ const CityManagement = () => {
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCreateCity}
-                  className="px-4 py-2 bg-[#63B883] text-white rounded-md hover:bg-[#4ea172]"
+                  className="px-4 py-2 bg-[#63B883] text-white rounded-md shadow hover:bg-[#4ea172]"
                 >
                   Create
                 </button>
@@ -157,81 +169,90 @@ const CityManagement = () => {
         <div className="overflow-x-auto">
           {isLoading ? (
             <CustomeLoader message="Loading cities, please wait..." />
+          ) : citiesList.length === 0 ? (
+            <div className="rounded-xl border border-[#E8ECF4] bg-gradient-to-br from-white via-[#F7F9FC] to-[#EEF3FB] p-6 shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-[#4F46E5] shadow-md">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="h-6 w-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3.75 9h16.5m-16.5 0a2.25 2.25 0 0 1 2.25-2.25h12.75a2.25 2.25 0 0 1 2.25 2.25m-16.5 0v7.5A2.25 2.25 0 0 0 6 18.75h12a2.25 2.25 0 0 0 2.25-2.25V9m-9 4.5h3.75M9 13.5h.008v.008H9z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-[#1E1F2D] font-semibold">
+                    No cities found
+                  </p>
+                  <p className="text-sm text-[#6B7280]">
+                    Add a city to start managing availability across regions.
+                  </p>
+                </div>
+              </div>
+            </div>
           ) : (
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-start text-sm font-medium text-gray-500"
-                  >
-                    SL
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-start text-sm font-medium text-gray-500"
-                  >
-                    City
-                  </th>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {citiesList.map((city: any, index: number) => (
+                <div
+                  key={city.id}
+                  className="flex h-full flex-col rounded-xl border border-[#E8ECF4] bg-gradient-to-br from-white via-[#F9FAFB] to-[#F3F6FF] p-4 shadow-sm ring-1 ring-[#EEF1F7] transition hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div className="mb-2 flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-[#1E1F2D]">
+                        {city.city}
+                      </p>
+                      <p className="text-xs text-[#6B7280]">
+                        Added{" "}
+                        {city.createdAt
+                          ? new Date(city.createdAt).toLocaleDateString()
+                          : "-"}
+                      </p>
+                    </div>
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                        city.isAvailable
+                          ? "bg-[#E6F7EE] text-[#2F9E61]"
+                          : "bg-[#FFEDED] text-[#E34141]"
+                      }`}
+                    >
+                      {city.isAvailable ? "Available" : "Unavailable"}
+                    </span>
+                  </div>
 
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-start text-sm font-medium text-gray-500"
-                  >
-                    Create Time
-                  </th>
-                  <th
-                    scope="col"
-                    className="px-2 py-3.5 text-center text-sm font-medium text-gray-500 w-[15%]"
-                  >
-                    User Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {cities?.result?.cities.map((city: any, index: number) => (
-                  <tr key={city.id}>
-                    <td className="whitespace-nowrap py-3 text-sm text-[#3F3D56] font-[500]">
-                      {index + 1}
-                    </td>
-                    <td className="whitespace-nowrap py-3 text-sm text-[#3F3D56] font-[500]">
-                      {city.city}
-                    </td>
-                    <td className="whitespace-nowrap py-3 text-sm text-[#3F3D56] font-[500]">
-                      {city.createdAt
-                        ? new Date(city.createdAt).toDateString()
-                        : "Mon Jun 16 2025"}{" "}
-                    </td>
-                    <td className="whitespace-nowrap  py-3 text-sm text-gray-500 flex justify-center items-center gap-4">
-                      <select
-                        defaultValue={
-                          city.isAvailable ? "Available" : "Unavailable"
-                        }
-                        onChange={(e) =>
-                          handleStatusChange(e.target.value, city.id)
-                        }
-                        className="cursor-pointer inline-flex gap-2 items-center justify-center rounded-md border border-gray-300 bg-[#FFF7E8] px-2.5 py-2.5 font-medium text-[#63B883] shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                      >
-                        <option value="Available">Available</option>
-                        <option value="Unavailable">Unavailable</option>
-                      </select>
+                  <div className="mt-auto flex items-center justify-between gap-2">
+                    <select
+                      value={city.isAvailable ? "Available" : "Unavailable"}
+                      onChange={(e) =>
+                        handleStatusChange(e.target.value, city.id)
+                      }
+                      className="cursor-pointer inline-flex gap-2 items-center justify-center rounded-md border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-[#63B883] shadow-sm hover:-translate-y-0.5 hover:shadow-md transition"
+                    >
+                      <option value="Available">Available</option>
+                      <option value="Unavailable">Unavailable</option>
+                    </select>
 
-                      <div className="inline-block text-left">
-                        <button
-                          onClick={() => handleDelete(city?.id)}
-                          type="button"
-                          className="inline-flex gap-1 items-center justify-center rounded-md border border-transparent bg-[#FFEDED] px-2.5 py-2.5 text-xs font-medium text-[#FE4D4F] shadow-sm hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                          aria-controls={`alert-dialog-content-${city.id}`}
-                          aria-describedby={`alert-dialog-description-${city.id}`}
-                        >
-                          <Trash size={20} /> Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    <button
+                      onClick={() => handleDelete(city?.id)}
+                      type="button"
+                      className="inline-flex gap-1 items-center justify-center rounded-md border border-transparent bg-[#FFEDED] px-3 py-2 text-xs font-medium text-[#FE4D4F] shadow-sm hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition"
+                      aria-controls={`alert-dialog-content-${city.id}`}
+                      aria-describedby={`alert-dialog-description-${city.id}`}
+                    >
+                      <Trash size={18} /> Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

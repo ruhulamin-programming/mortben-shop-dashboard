@@ -108,7 +108,7 @@ const AdminProfile = () => {
         <h2 className="flex items-center gap-2 text-2xl font-semibold text-gray-800 mb-6">
           Admin Profile Information <Info />
         </h2>
-        <div className="relative mb-4">
+        <div className="mb-4">
           <label
             htmlFor="profileImage"
             className="block text-sm font-medium text-gray-700 mb-2"

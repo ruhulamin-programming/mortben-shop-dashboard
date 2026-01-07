@@ -1,7 +1,7 @@
 const Footer = () => {
   return (
     <footer className="bg-gray-50 text-center py-4 border-t border-gray-300 text-sm text-gray-500">
-      &copy; {new Date().getFullYear()} Admin Dashboard. All rights reserved.
+      &copy; {new Date().getFullYear()} Mortben Shop. All rights reserved.
     </footer>
   );
 };

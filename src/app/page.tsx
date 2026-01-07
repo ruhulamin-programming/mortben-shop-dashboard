@@ -23,7 +23,12 @@ const LoginPage = () => {
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<IFormInput>();
+  } = useForm<IFormInput>({
+    defaultValues: {
+      email: "admin@gmail.com",
+      password: "123456",
+    },
+  });
   const [loginFunction, { isLoading }] = useAdminLoginMutation();
 
   const handleLogin = async ({ email, password }: IFormInput) => {
@@ -96,15 +101,6 @@ const LoginPage = () => {
                 {errors.password.message}
               </p>
             )}
-          </div>
-
-          {/* Checkbox */}
-          <div className="mb-6 flex items-center gap-2">
-            <input type="checkbox" />
-            <label className="text-sm text-gray-600">
-              I agree with{" "}
-              <span className="text-[#6E498B]">Terms and Privacy</span>
-            </label>
           </div>
 
           {/* Submit Button */}
